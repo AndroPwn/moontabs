@@ -1,0 +1,25 @@
+{
+  "manifest_version": 2,
+  "name": "Smart Tab Closer",
+  "version": "1.0.0",
+  "description": "Closes inactive tabs but learns how often you return to them — and protects the ones you always come back to.",
+  "permissions": [
+    "tabs",
+    "storage",
+    "alarms",
+    "sessions"
+  ],
+  "background": {
+    "scripts": ["background.js"],
+    "persistent": true
+  },
+  "browser_action": {
+    "default_popup": "popup.html"
+  },
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "smart-tab-closer@user",
+      "strict_min_version": "91.0"
+    }
+  }
+}
