@@ -77,7 +77,7 @@ browser.alarms.onAlarm.addListener(alarm => {
 
       if (isProtectedDomain(data.domain)) return;
 
-      browser.tabs.remove(tab.id);
+      browser.tabs.discard(tab.id);
     });
   });
 });
