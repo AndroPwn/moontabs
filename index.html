@@ -1,0 +1,115 @@
+// popup.js
+
+// Keep track of current settings in memory
+let state = {
+  enabled: true,
+  limit: 5, // minutes
+  gap: 8, // hours
+  exceptions: ['wikipedia.com'] // default
+};
+
+// State handling function
+function updateStateView() {
+  const popupElement = document.getElementById("popup");
+  const footerStat = document.getElementById("footerStat");
+  const saveBtn = document.getElementById("saveBtn");
+  
+  // Update enabled state visually
+  if (state.enabled) {
+    popupElement.classList.remove("off");
+    footerStat.innerHTML = `Running • <strong>${state.limit}</strong> min discard`;
+  } else {
+    popupElement.classList.add("off");
+    footerStat.innerText = "Deactivated";
+  }
+
+  // Value numbers were removed from HTML, so we don't update them on screen.
+  // The 'step' function below will update the 'state' variable instead.
+
+  // Render exception tags
+  const tagsElement = document.getElementById("tags");
+  tagsElement.innerHTML = ''; // Clear and re-render
+  state.exceptions.forEach(domain => {
+    const tag = document.createElement("div");
+    tag.className = "tag";
+    tag.innerHTML = `${domain} <button class="tx" onclick="removeDomain(this)">×</button>`;
+    tagsElement.appendChild(tag);
+  });
+}
+
+// UI Interaction functions
+function toggleEnabled() {
+  state.enabled = !state.enabled;
+  updateStateView();
+}
+
+function step(type, change) {
+  // If the extension is off, do nothing
+  if (!state.enabled) return;
+
+  // We are keeping the step logic even if the '+' button is removed,
+  // in case you want to add functional steppers later. For now, this just updates the variable.
+  if (type === 'limit') {
+    state.limit = Math.max(1, Math.min(60, state.limit + change));
+  } else if (type === 'gap') {
+    state.gap = Math.max(1, Math.min(24, state.gap + change));
+  }
+  
+  // Since values were removed from the HTML, this update doesn't visual do anything with numbers,
+  // but it does update the footer status text.
+  updateStateView();
+}
+
+function addDomain() {
+  const input = document.getElementById("domainInput");
+  const domain = input.value.trim().toLowerCase();
+  
+  if (domain && !state.exceptions.includes(domain)) {
+    state.exceptions.push(domain);
+    input.value = ''; // clear input
+    updateStateView();
+  }
+}
+
+function removeDomain(btn) {
+  // Get the domain from the parent tag element text (minus the delete character)
+  const domainTagText = btn.parentNode.innerText;
+  const domain = domainTagText.substring(0, domainTagText.length - 1).trim();
+  
+  state.exceptions = state.exceptions.filter(d => d !== domain);
+  updateStateView();
+}
+
+function saveSettings() {
+  const saveBtn = document.getElementById("saveBtn");
+  
+  // Simulate saving data to browser storage
+  console.log("Saving settings to storage:", state);
+  // Chrome API (e.g.): chrome.storage.local.set({moontabsState: state});
+
+  // Provide visual feedback
+  saveBtn.classList.add("saved");
+  saveBtn.innerText = "Saved!";
+  setTimeout(() => {
+    saveBtn.classList.remove("saved");
+    saveBtn.innerText = "Save";
+  }, 1000);
+}
+
+// Initial view render
+updateStateView();
+
+// Handle tab list loading and rendering (requires browser API access)
+// Since this is a template, we just use the placeholder 'Loading...' message
+const tabList = document.getElementById("tabList");
+// If this were a real extension, we'd add logic here to fetch and render tabs:
+// chrome.tabs.query({}, (tabs) => {
+//   if (tabs.length === 0) {
+//     tabList.innerHTML = '<div style="font-size:11px;color:var(--muted);text-align:center;padding:16px 0">No tabs to display</div>';
+//   } else {
+//     tabList.innerHTML = ''; // Clear loading message
+//     tabs.forEach(tab => {
+//       // Render list items dynamically...
+//     });
+//   }
+// });

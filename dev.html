@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Moontabs — Dev</title>
+  <style>
+    body { background: #111; display: flex; justify-content: center; padding: 40px; gap: 30px; }
+    #log {
+      background: #0a0a0a; border: 1px solid #222; border-radius: 8px;
+      padding: 12px; width: 300px; font-family: monospace; font-size: 11px;
+      color: #aaa; max-height: 480px; overflow-y: auto; align-self: flex-start;
+    }
+    #log h3 { color: #555; font-size: 10px; letter-spacing: .1em; margin-bottom: 8px; }
+    .entry { margin-bottom: 6px; padding-bottom: 6px; border-bottom: 1px solid #1a1a1a; }
+    .entry .type { color: #a78bfa; font-weight: bold; }
+    .entry .val  { color: #22d3ee; display: block; margin-top: 2px; word-break: break-all; }
+  </style>
+</head>
+<body>
+
+<iframe id="frame" src="popup.html"
+  style="border:none;border-radius:12px;box-shadow:0 0 40px rgba(124,58,237,0.4);"
+  width="300" height="480">
+</iframe>
+
+<div id="log">
+  <h3>▸ MESSAGES</h3>
+</div>
+
+<script>
+  const fakeState = {
+    inactivityLimit: 5 * 60000,
+    maxGap:          8 * 3600000,
+    minGap:          30 * 1000,
+    exceptions:      ["spotify.com"],
+    enabled:         true,
+    tabs: [
+      { id:1, domain:"github.com",       title:"GitHub",        active:true,  pinned:false, audible:false, discarded:false, inactiveMs:0,           protected:false, exception:false },
+      { id:2, domain:"music.youtube.com",title:"YT Music",      active:false, pinned:false, audible:true,  discarded:false, inactiveMs:120000,      protected:true,  exception:false },
+      { id:3, domain:"wikipedia.org",    title:"Wikipedia",     active:false, pinned:false, audible:false, discarded:false, inactiveMs:4*60000,     protected:true,  exception:false },
+      { id:4, domain:"reddit.com",       title:"Reddit",        active:false, pinned:false, audible:false, discarded:false, inactiveMs:4.5*60000,   protected:false, exception:false },
+      { id:5, domain:"notion.so",        title:"Notion",        active:false, pinned:false, audible:false, discarded:true,  inactiveMs:30*60000,    protected:false, exception:false },
+      { id:6, domain:"linear.app",       title:"Linear",        active:false, pinned:false, audible:false, discarded:true,  inactiveMs:45*60000,    protected:false, exception:false },
+      { id:7, domain:"figma.com",        title:"Figma",         active:false, pinned:false, audible:false, discarded:false, inactiveMs:2*60000,     protected:false, exception:false },
+      { id:8, domain:"spotify.com",      title:"Spotify",       active:false, pinned:false, audible:false, discarded:false, inactiveMs:10*60000,    protected:false, exception:true  },
+    ]
+  };
+
+  function log(type, data) {
+    const el = document.getElementById("log");
+    const entry = document.createElement("div");
+    entry.className = "entry";
+    entry.innerHTML = `<span class="type">${type}</span><span class="val">${JSON.stringify(data, null, 2)}</span>`;
+    el.appendChild(entry);
+    el.scrollTop = el.scrollHeight;
+  }
+
+  const mockBrowser = {
+    runtime: {
+      sendMessage(msg) {
+        log(msg.type, msg);
+        if (msg.type === "GET_STATE")    return Promise.resolve({ ...fakeState });
+        if (msg.type === "SET_SETTINGS") {
+          fakeState.inactivityLimit = msg.inactivityLimit;
+          fakeState.maxGap          = msg.maxGap;
+          fakeState.minGap          = msg.minGap;
+          fakeState.exceptions      = msg.exceptions;
+          return Promise.resolve({ ok: true });
+        }
+        if (msg.type === "SET_ENABLED") {
+          fakeState.enabled = msg.enabled;
+          return Promise.resolve({ ok: true });
+        }
+        return Promise.resolve({});
+      }
+    }
+  };
+
+  document.getElementById("frame").addEventListener("load", function() {
+    // inject mock browser API into iframe
+    this.contentWindow.browser = mockBrowser;
+    // re-run popup.js init now that browser is available
+    const s = this.contentDocument.createElement("script");
+    s.src = "popup.js";
+    this.contentDocument.body.appendChild(s);
+  });
+</script>
+
+</body>
+</html>
