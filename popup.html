@@ -1,68 +1,109 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Smart Tab Closer</title>
+  <meta charset="UTF-8"/>
+  <title>Moontabs</title>
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      width: 340px;
-      font-family: system-ui, sans-serif;
-      font-size: 13px;
-      background: #0f0f0f;
-      color: #e0e0e0;
-      padding: 16px;
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{
+      width:300px;
+      font-family:system-ui,sans-serif;
+      background:#0a0612;
+      color:#c8c8e8;
+      padding:0;
     }
-    h1 { font-size: 14px; font-weight: 600; color: #fff; margin-bottom: 4px; }
-    .subtitle { font-size: 11px; color: #666; margin-bottom: 16px; }
-    .section-label {
-      font-size: 10px; text-transform: uppercase;
-      letter-spacing: 0.08em; color: #555; margin-bottom: 8px;
+    .header{
+      padding:14px 16px;
+      border-bottom:1px solid #1e1e35;
+      display:flex;align-items:center;justify-content:space-between;
     }
-    .tab-list {
-      display: flex; flex-direction: column; gap: 6px;
-      max-height: 360px; overflow-y: auto; margin-bottom: 16px;
+    .brand{display:flex;align-items:center;gap:10px}
+    .logo{width:28px;height:28px;border-radius:8px;object-fit:cover}
+    .brand-text h1{font-size:13px;font-weight:600;color:#e0e0f8;letter-spacing:0.01em}
+    .brand-text p{font-size:10px;color:#44445a;margin-top:1px}
+    .toggle-btn{
+      width:32px;height:18px;border-radius:9px;
+      border:none;cursor:pointer;position:relative;
+      transition:background 0.2s;flex-shrink:0;
     }
-    .tab-row {
-      display: flex; align-items: center; gap: 10px;
-      padding: 8px 10px; border-radius: 8px;
-      background: #1a1a1a; border: 1px solid #222;
+    .toggle-btn.on{background:linear-gradient(90deg,#a855f7,#22d3ee)}
+    .toggle-btn.off{background:#1e1e35}
+    .toggle-knob{
+      position:absolute;top:2px;width:14px;height:14px;
+      border-radius:50%;background:#fff;
+      transition:left 0.2s;
     }
-    .tab-row.protected { border-color: #2a3a2a; background: #141a14; }
-    .tab-row.active-tab { border-color: #2a2a3a; background: #14141a; }
-    .favicon { width: 14px; height: 14px; flex-shrink: 0; opacity: 0.8; }
-    .tab-info { flex: 1; min-width: 0; }
-    .tab-domain {
-      font-size: 12px; font-weight: 500; color: #ccc;
-      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    .toggle-btn.on .toggle-knob{left:16px}
+    .toggle-btn.off .toggle-knob{left:2px}
+
+    .section{padding:12px 16px;border-bottom:1px solid #1a1a28}
+
+    .row{display:flex;align-items:center;justify-content:space-between;gap:8px}
+    .label{font-size:11px;color:#6666aa}
+    .input-group{display:flex;align-items:center;gap:6px}
+    .num-input{
+      width:44px;padding:4px 8px;
+      background:#13132a;border:1px solid #2a2a45;
+      border-radius:6px;color:#c8c8e8;
+      font-size:12px;text-align:center;
+      outline:none;
     }
-    .tab-meta { font-size: 10px; color: #555; margin-top: 2px; }
-    .badge {
-      font-size: 9px; font-weight: 600; padding: 2px 6px;
-      border-radius: 4px; flex-shrink: 0;
-      text-transform: uppercase; letter-spacing: 0.05em;
+    .num-input:focus{border-color:#7a5af8}
+    .unit{font-size:11px;color:#44445a}
+
+    .exc-label{
+      font-size:10px;text-transform:uppercase;
+      letter-spacing:0.08em;color:#44445a;margin-bottom:8px;
     }
-    .badge-protected { background: #1a3a1a; color: #5a9a5a; border: 1px solid #2a4a2a; }
-    .badge-active    { background: #1a1a3a; color: #5a5aaa; border: 1px solid #2a2a4a; }
-    .badge-audible   { background: #3a1a1a; color: #aa5a5a; border: 1px solid #4a2a2a; }
-    .badge-at-risk   { background: #2a1a00; color: #aa7a30; border: 1px solid #3a2a00; }
-    .forget-btn {
-      background: none; border: 1px solid #333; color: #555;
-      font-size: 10px; padding: 2px 6px; border-radius: 4px; cursor: pointer;
+    .domain-row{display:flex;gap:6px;margin-bottom:8px}
+    .domain-input{
+      flex:1;padding:5px 10px;
+      background:#13132a;border:1px solid #2a2a45;
+      border-radius:6px;color:#c8c8e8;font-size:11px;outline:none;
     }
-    .forget-btn:hover { border-color: #555; color: #888; }
-    .empty { text-align: center; color: #444; padding: 24px 0; font-size: 12px; }
-    .footer { font-size: 10px; color: #444; text-align: center; }
-    ::-webkit-scrollbar { width: 4px; }
-    ::-webkit-scrollbar-thumb { background: #2a2a2a; border-radius: 2px; }
-  </style>
-</head>
-<body>
-  <h1>Smart Tab Closer</h1>
-  <p class="subtitle">Learning your tab habits. Closing the ones you forget.</p>
-  <p class="section-label">Open tabs</p>
-  <div class="tab-list" id="tab-list"><div class="empty">Loading…</div></div>
-  <p class="footer" id="footer"></p>
-  <script src="popup.js"></script>
-</body>
-</html>
+    .domain-input::placeholder{color:#33334a}
+    .domain-input:focus{border-color:#7a5af8}
+    .add-btn{
+      padding:5px 10px;background:#1a1a30;
+      border:1px solid #2a2a45;border-radius:6px;
+      color:#7a7aaa;font-size:13px;cursor:pointer;
+    }
+    .add-btn:hover{border-color:#7a5af8;color:#a78bfa}
+    .tags{display:flex;flex-wrap:wrap;gap:4px;min-height:4px}
+    .tag{
+      display:inline-flex;align-items:center;gap:4px;
+      background:#13132a;border:1px solid #2a2a45;
+      border-radius:6px;padding:3px 8px;
+    }
+    .tag span{font-size:11px;color:#8888cc}
+    .tag button{
+      background:none;border:none;color:#44445a;
+      font-size:12px;cursor:pointer;padding:0;line-height:1;
+    }
+    .tag button:hover{color:#f87171}
+
+    .tabs-label{
+      font-size:10px;text-transform:uppercase;
+      letter-spacing:0.08em;color:#44445a;margin-bottom:8px;
+    }
+    .tab-list{display:flex;flex-direction:column;gap:4px;max-height:200px;overflow-y:auto}
+    .tab-row{
+      display:flex;align-items:center;gap:8px;
+      padding:6px 10px;border-radius:8px;
+      background:#13132a;border:1px solid #1e1e2e;
+    }
+    .tab-row.sleeping{opacity:0.45}
+    .tab-row.sleeping .tab-domain{color:#33334a}
+    .fav{width:13px;height:13px;border-radius:3px;flex-shrink:0}
+    .tab-domain{
+      flex:1;font-size:11px;color:#8888bb;
+      white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+    }
+    .badge{
+      font-size:9px;font-weight:600;padding:2px 6px;
+      border-radius:4px;letter-spacing:0.04em;flex-shrink:0;
+    }
+    .b-protected{background:#0e1a2e;color:#22d3ee;border:1px solid #1a3a4a}
+    .b-risk{background:#2a1400;color:#f59e0b;border:1px solid #3a2400}
+    .b-sleep{background:#0e0e22;color:#6666aa;border:1px solid #1e1e35;display:flex;align-items:center;gap:3px}
+    .b

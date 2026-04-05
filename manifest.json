@@ -1,8 +1,8 @@
 {
   "manifest_version": 2,
-  "name": "Smart Tab Closer",
+  "name": "Moontabs",
   "version": "1.0.0",
-  "description": "Closes inactive tabs but learns how often you return to them — and protects the ones you always come back to.",
+  "description": "Tabs that sleep. Learns your patterns and protects the ones you always come back to.",
   "permissions": [
     "tabs",
     "storage",
@@ -14,11 +14,15 @@
     "persistent": true
   },
   "browser_action": {
-    "default_popup": "popup.html"
+    "default_popup": "popup.html",
+    "default_icon": {
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
   },
   "browser_specific_settings": {
     "gecko": {
-      "id": "smart-tab-closer@user",
+      "id": "moontabs@user",
       "strict_min_version": "91.0"
     }
   }
