@@ -63,7 +63,7 @@ function recordVisit(tab) {
   let domain;
   try { domain = normalizeDomain(new URL(tab.url).hostname); }
   catch { return; }
-
+  console.log(`[moontabs] recordVisit: ${domain} active:${tab.active}`); // add this
   const now = Date.now();
   tabData[tab.id] = { domain, lastActive: now };
 
@@ -85,7 +85,8 @@ browser.alarms.onAlarm.addListener(alarm => {
     console.log(`[moontabs] alarm fired — checking ${tabs.length} tabs`);
 
     tabs.forEach(tab => {
-      if (tab.active || tab.audible) return;
+      // Fix 1: also skip pinned tabs — previously only checked in UI, not here
+      if (tab.active || tab.audible || tab.pinned) return;
 
       const data = tabData[tab.id];
       if (!data) return;
@@ -101,8 +102,17 @@ browser.alarms.onAlarm.addListener(alarm => {
       );
 
       if (inactiveMs < INACTIVITY_LIMIT) return;
-      if (exc)  return;
-      if (prot) return;
+      if (exc) return;
+
+      // Fix 2: learned domains get a grace period based on their avg return gap,
+      // rather than being permanently exempt (old: if (prot) return)
+      if (prot) {
+        const history    = domainHistory[data.domain];
+        const avgGap     = getAvgGap(history);
+        const gracePeriod = avgGap ? avgGap * 1.5 : INACTIVITY_LIMIT * 3;
+        if (inactiveMs < gracePeriod) return;
+        // Falls through to discard if inactive longer than the grace period
+      }
 
       console.log(`[moontabs] discarding ${data.domain}`);
       browser.tabs.discard(tab.id);
@@ -118,7 +128,8 @@ function isProtectedDomain(domain) {
   if (!gaps.length) return false;
 
   const avg = gaps.reduce((a, b) => a + b, 0) / gaps.length;
-  return avg > INACTIVITY_LIMIT;
+  // Protect if user typically returns BEFORE the inactivity limit would fire
+  return avg < INACTIVITY_LIMIT;
 }
 
 function getFilteredGaps(visits) {
