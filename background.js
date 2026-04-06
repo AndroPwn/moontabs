@@ -86,7 +86,7 @@ browser.alarms.onAlarm.addListener(alarm => {
 
     tabs.forEach(tab => {
       // Fix 1: also skip pinned tabs — previously only checked in UI, not here
-      if (tab.active || tab.audible || tab.pinned) return;
+      if (tab.active || tab.audible ) return;
 
       const data = tabData[tab.id];
       if (!data) return;
