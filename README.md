@@ -10,7 +10,7 @@
 
 ## What it does
 
-Moontabs discards (makes them sleep doesnt close it so you can return back to the same tab you had opened) inactive tabs to free up memory — but unlike other tab managers, it learns your browsing patterns over time.
+Moontabs discards (makes them sleep, doesnt close it so you can return back to the same tab you had opened) inactive tabs to free up memory — but unlike other tab managers, it learns your browsing patterns over time.
 
 Every time you visit a tab it records a timestamp. Over time it calculates your average return interval per domain. If you typically return to a tab on a longer cycle than the inactivity limit, it gets a grace period proportional to your pattern instead of being closed blindly.
 
