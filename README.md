@@ -34,7 +34,7 @@ Everything is configurable directly from the popup — no code editing needed. C
 |---|---|---|
 | Discard after | 5 mins | How long a tab can be inactive before being discarded |
 | Ignore gaps over | 8 hrs | Gaps longer than this are excluded from pattern learning |
-| Ignore gaps under | 30 secs | Rapid tab switching noise, excluded from learning |
+| Ignore gaps | same as discard after | Rapid tab switching noise, excluded from learning |
 | Exceptions | — | Domains that are never discarded, regardless of activity |
 
 ---
