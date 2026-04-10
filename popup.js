@@ -183,6 +183,15 @@ function renderState(state) {
       }
       row.appendChild(cd);
 
+      const forget = document.createElement("button");
+      forget.className = "tx";
+      forget.textContent = "×";
+      forget.title = "Forget learned pattern";
+      forget.addEventListener("click", () => {
+        browser.runtime.sendMessage({ type: "FORGET_DOMAIN", domain: tab.domain });
+      });
+      row.appendChild(forget);
+
     } else {
       row.appendChild(makeCountdownBadge(tab.inactiveMs));
     }

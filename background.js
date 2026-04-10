@@ -6,7 +6,7 @@ let ENABLED = true;
 // MIN_GAP is always derived — gaps shorter than the inactivity limit are noise
 function getMinGap() { return INACTIVITY_LIMIT; }
 
-const MAX_VISITS_STORED = 20;
+const MAX_VISITS_STORED = 100;
 const MIN_VISITS_TO_LEARN = 2;
 
 let tabData = {};
