@@ -1,8 +1,10 @@
 let INACTIVITY_LIMIT = 5 * 60 * 1000;
 let MAX_GAP  = 8 * 60 * 60 * 1000;
-let MIN_GAP  = 30 * 1000;
 let EXCEPTIONS = [];
 let ENABLED = true;
+
+// MIN_GAP is always derived — gaps shorter than the inactivity limit are noise
+function getMinGap() { return INACTIVITY_LIMIT; }
 
 const MAX_VISITS_STORED = 20;
 const MIN_VISITS_TO_LEARN = 2;
@@ -19,11 +21,10 @@ function isException(domain) {
 }
 
 // load saved settings, then seed all open tabs
-browser.storage.local.get(["inactivityLimit","maxGap","minGap","exceptions","enabled","domainHistory"])
-  .then(({ inactivityLimit, maxGap, minGap, exceptions, enabled, domainHistory: saved }) => {
+browser.storage.local.get(["inactivityLimit","maxGap","exceptions","enabled","domainHistory"])
+  .then(({ inactivityLimit, maxGap, exceptions, enabled, domainHistory: saved }) => {
     if (inactivityLimit)       INACTIVITY_LIMIT = inactivityLimit;
     if (maxGap)                MAX_GAP          = maxGap;
-    if (minGap !== undefined)  MIN_GAP          = minGap;
     if (exceptions)            EXCEPTIONS       = exceptions;
     if (enabled !== undefined) ENABLED          = enabled;
     if (saved)                 domainHistory    = saved;
@@ -128,15 +129,16 @@ function isProtectedDomain(domain) {
   if (!gaps.length) return false;
 
   const avg = gaps.reduce((a, b) => a + b, 0) / gaps.length;
-  // Protect if user typically returns BEFORE the inactivity limit would fire
-  return avg < INACTIVITY_LIMIT;
+  // Protect if user typically returns on a LONGER cycle than the inactivity limit
+  // (e.g. limit is 5m, you return every 30m → protect it)
+  return avg > INACTIVITY_LIMIT;
 }
 
 function getFilteredGaps(visits) {
   const gaps = [];
   for (let i = 1; i < visits.length; i++) {
     const gap = visits[i] - visits[i - 1];
-    if (gap >= MIN_GAP && gap <= MAX_GAP) gaps.push(gap);
+    if (gap >= getMinGap() && gap <= MAX_GAP) gaps.push(gap);
   }
   return gaps;
 }
@@ -152,7 +154,6 @@ browser.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
   if (msg.type === "SET_SETTINGS") {
     INACTIVITY_LIMIT = msg.inactivityLimit;
     MAX_GAP          = msg.maxGap;
-    MIN_GAP          = msg.minGap;
     EXCEPTIONS       = msg.exceptions;
     persistAll();
     sendResponse({ ok: true });
@@ -194,7 +195,6 @@ browser.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
         tabs:            result,
         inactivityLimit: INACTIVITY_LIMIT,
         maxGap:          MAX_GAP,
-        minGap:          MIN_GAP,
         exceptions:      EXCEPTIONS,
         enabled:         ENABLED
       });
@@ -215,7 +215,6 @@ function persistAll() {
     domainHistory,
     inactivityLimit: INACTIVITY_LIMIT,
     maxGap:          MAX_GAP,
-    minGap:          MIN_GAP,
     exceptions:      EXCEPTIONS
   });
 }

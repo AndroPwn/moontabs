@@ -12,7 +12,6 @@ function persist() {
     type:            "SET_SETTINGS",
     inactivityLimit: sanitize("limitInput",  5,  60000),
     maxGap:          sanitize("maxGapInput", 8,  3600000),
-    minGap:          sanitize("minGapInput", 30, 1000),
     exceptions:      currentExceptions
   });
 }
@@ -100,7 +99,6 @@ function renderState(state) {
 
   document.getElementById("limitInput").value  = Math.round(inactivityLimit / 60000);
   document.getElementById("maxGapInput").value = Math.round(maxGap / 3600000);
-  document.getElementById("minGapInput").value = Math.round((minGap ?? 30000) / 1000);
 
   applyEnabledUI();
   renderTags();
@@ -216,7 +214,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (e.key === "Enter") addDomain();
   });
 
-  ["limitInput", "maxGapInput", "minGapInput"].forEach(id => {
+  ["limitInput", "maxGapInput"].forEach(id => {
     document.getElementById(id).addEventListener("change", persist);
   });
 
