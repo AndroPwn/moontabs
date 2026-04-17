@@ -47,7 +47,7 @@ Everything is configurable directly from the popup — no code editing needed. C
 4. If your return interval is shorter than the inactivity limit, the domain is protected
 5. If it's longer, the tab gets a grace period of `1.5 × avg return interval` before being discarded
 
-Up to 20 visits per domain are stored. It takes a minimum of 2 visits before any learning kicks in.
+Up to 100 visits per domain are stored. It takes a minimum of 2 visits before any learning kicks in.
 
 ---
 
