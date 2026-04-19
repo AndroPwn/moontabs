@@ -1,3 +1,5 @@
+if (typeof browser === "undefined") var browser = chrome;
+
 let currentExceptions = [];
 let currentEnabled    = true;
 let inactivityLimitMs = 5 * 60 * 1000;
@@ -142,13 +144,6 @@ function renderState(state) {
       b.textContent = "protected";
       row.appendChild(b);
 
-    } else if (tab.pinned) {
-      const bp = document.createElement("span");
-      bp.className = "badge b-prot";
-      bp.textContent = "pinned";
-      row.appendChild(bp);
-      row.appendChild(makeCountdownBadge(tab.inactiveMs));
-
     } else if (tab.audible) {
       const b = document.createElement("span");
       b.className = "badge b-prot";
@@ -162,6 +157,12 @@ function renderState(state) {
       row.appendChild(b);
 
     } else if (tab.learned) {
+      if (tab.pinned) {
+        const bp = document.createElement("span");
+        bp.className = "badge b-prot";
+        bp.textContent = "pinned";
+        row.appendChild(bp);
+      }
       const b = document.createElement("span");
       b.className = "badge b-learned";
       const avgText = tab.avgReturnMs ? formatMs(tab.avgReturnMs) : null;
@@ -191,6 +192,13 @@ function renderState(state) {
         browser.runtime.sendMessage({ type: "FORGET_DOMAIN", domain: tab.domain });
       });
       row.appendChild(forget);
+
+    } else if (tab.pinned) {
+      const bp = document.createElement("span");
+      bp.className = "badge b-prot";
+      bp.textContent = "pinned";
+      row.appendChild(bp);
+      row.appendChild(makeCountdownBadge(tab.inactiveMs));
 
     } else {
       row.appendChild(makeCountdownBadge(tab.inactiveMs));
